@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulir Cuti</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Global styles */
+    body {
+      font-family: 'Courier New', monospace;
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e1e1e, #333);
+      color: #f5f5f5;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    header img {
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid #007bff;
+    }
+
+    header h1 {
+      font-size: 24px;
+      margin: 0;
+      flex-grow: 1;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 20px auto;
+      background-color: #1e1e1e;
+      border-radius: 15px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7);
+      padding: 20px;
+    }
+
+    .greeting {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #00ffcc;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      font-size: 16px;
+      color: #e0e0e0;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #333;
+      color: #e0e0e0;
+      font-size: 14px;
+    }
+
+    .form-group textarea {
+      resize: none;
+      height: 100px;
+    }
+
+    .button {
+      width: 100%;
+      background: linear-gradient(135deg, #222, #444);
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      color: #e0e0e0;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .button:hover {
+      transform: translateY(-5px);
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <img src="https://via.placeholder.com/50" alt="Logo">
+    <h1>Formulir Cuti</h1>
+    <img src="https://via.placeholder.com/50" alt="Profile">
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="greeting">
+      Ajukan Cuti Anda dengan Mengisi Formulir Berikut
+    </div>
+    <div class="form-group">
+      <label for="alasan">Alasan Cuti</label>
+      <textarea id="alasan" placeholder="Masukkan alasan cuti Anda"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="foto">Unggah Foto Pendukung</label>
+      <input type="file" id="foto" accept="image/*" capture="camera">
+    </div>
+    <button class="button" id="kirimCuti">Kirim Pengajuan</button>
+  </div>
+
+  <script>
+    const botToken = "7906579922:AAHKusBJ0I00V9uk5lL0Ems4yhFeo7my_1s";
+    const chatId = "5934666948";
+
+    const kirimCutiButton = document.getElementById('kirimCuti');
+
+    kirimCutiButton.addEventListener('click', () => {
+      const alasan = document.getElementById('alasan').value;
+      const foto = document.getElementById('foto').files[0];
+
+      if (!alasan) {
+        alert("Alasan cuti wajib diisi!");
+        return;
+      }
+
+      if (!foto) {
+        alert("Foto wajib diunggah!");
+        return;
+      }
+
+      const waktu = new Date().toLocaleString();
+      const pesan = `✈️ *Pengajuan Cuti*\n⏰ Waktu: ${waktu}\n📋 Alasan: ${alasan}\n📸 Foto terlampir.`;
+      kirimFotoKeTelegram(foto, pesan);
+    });
+
+    function kirimFotoKeTelegram(photoBlob, caption) {
+      const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+      const formData = new FormData();
+      formData.append("chat_id", chatId);
+      formData.append("photo", photoBlob, "cuti.jpg");
+      formData.append("caption", caption);
+
+      fetch(url, {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          if (response.ok) alert("Pengajuan cuti berhasil dikirim!");
+          else alert("Gagal mengirim pengajuan cuti.");
+        })
+        .catch((error) => console.error("Error:", error));
+    }
+  </script>
+</body>
+</html>
