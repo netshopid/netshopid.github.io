@@ -4,73 +4,139 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistem Absensi Kerja</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    .button {
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      color: white;
-      background-color: #007bff;
-      border-radius: 5px;
-    }
-    .button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    #log {
-      margin-top: 20px;
-      font-size: 14px;
-    }
+    /* Sama seperti sebelumnya */
+    body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; text-align: center; }
+    header { background-color: #fff; padding: 15px; border-bottom: 1px solid #ddd; display: flex; align-items: center; justify-content: center; }
+    header img { height: 40px; margin-right: 10px; }
+    header h1 { font-size: 18px; margin: 0; }
+    .container { padding: 20px; }
+    .greeting { font-size: 16px; color: #555; margin-bottom: 20px; }
+    .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .button { background-color: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 20px; text-align: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); cursor: pointer; transition: transform 0.2s; }
+    .button:hover { transform: scale(1.05); }
+    .button i { font-size: 30px; color: #007bff; margin-bottom: 10px; }
+    .button span { font-size: 14px; color: #333; }
+    .custom-form { margin-top: 30px; background-color: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+    .custom-form h3 { margin: 0 0 15px 0; color: #333; }
+    .custom-form input, .custom-form select, .custom-form textarea, .custom-form button { margin: 10px 0; padding: 10px; width: 100%; font-size: 14px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+    footer { background-color: #fff; padding: 10px; position: fixed; bottom: 0; width: 100%; border-top: 1px solid #ddd; display: flex; justify-content: space-around; }
+    footer i { font-size: 24px; color: #888; }
+    footer i.active { color: #007bff; }
   </style>
 </head>
 <body>
-  <h1>Sistem Absensi Kerja</h1>
-  <button id="btnMasuk" class="button">Waktu Masuk</button>
-  <button id="btnPulang" class="button" disabled>Waktu Pulang</button>
-  <div id="log"></div>
+  <header>
+    <img src="https://via.placeholder.com/40" alt="Logo">
+    <h1>Sistem Absensi</h1>
+  </header>
+
+  <div class="container">
+    <div class="greeting">
+      Selamat Pagi! Jaga kesehatan yaa. Semangat bekerja!
+    </div>
+    <div class="buttons">
+      <div class="button" id="clockIn">
+        <i class="fas fa-sign-in-alt"></i>
+        <span>Clock In</span>
+      </div>
+      <div class="button" id="clockOut">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Clock Out</span>
+      </div>
+      <div class="button" id="clockOutOvertime">
+        <i class="fas fa-clock"></i>
+        <span>Clock Out Lembur</span>
+      </div>
+      <div class="button" id="photoAbsen">
+        <i class="fas fa-camera"></i>
+        <span>Foto Absen</span>
+      </div>
+    </div>
+
+    <div class="custom-form">
+      <h3>Custom Absensi</h3>
+      <select id="absenType">
+        <option value="Clock In">Clock In</option>
+        <option value="Clock Out">Clock Out</option>
+        <option value="Clock Out Lembur">Clock Out Lembur</option>
+      </select>
+      <input type="time" id="customTime" placeholder="Pilih waktu">
+      <textarea id="customReason" placeholder="Alasan (Opsional)"></textarea>
+      <button id="customSubmit">Kirim</button>
+    </div>
+  </div>
+
+  <footer>
+    <i class="fas fa-home active"></i>
+    <i class="fas fa-user"></i>
+    <i class="fas fa-cog"></i>
+  </footer>
 
   <script>
     const botToken = "7906579922:AAHKusBJ0I00V9uk5lL0Ems4yhFeo7my_1s";
     const chatId = "5934666948";
 
-    const btnMasuk = document.getElementById('btnMasuk');
-    const btnPulang = document.getElementById('btnPulang');
-    const log = document.getElementById('log');
+    const clockInButton = document.getElementById('clockIn');
+    const clockOutButton = document.getElementById('clockOut');
+    const clockOutOvertimeButton = document.getElementById('clockOutOvertime');
+    const photoAbsenButton = document.getElementById('photoAbsen');
+    const customSubmitButton = document.getElementById('customSubmit');
 
-    let waktuMasuk = null;
-    let waktuPulang = null;
-
-    btnMasuk.addEventListener('click', () => {
+    clockInButton.addEventListener('click', () => {
       const now = new Date();
-      waktuMasuk = now.toLocaleString();
-      btnMasuk.disabled = true;
-      btnPulang.disabled = false;
-
-      log.innerHTML = `<p>Waktu Masuk: ${waktuMasuk}</p>`;
-      kirimKeTelegram(`Waktu Masuk: ${waktuMasuk}`);
+      const message = `📥 *Clock In*\n⏰ Waktu: ${now.toLocaleString()}\n💡 Semangat bekerja!`;
+      kirimKeTelegram(message);
     });
 
-    btnPulang.addEventListener('click', () => {
+    clockOutButton.addEventListener('click', () => {
       const now = new Date();
-      waktuPulang = now.toLocaleString();
-      btnPulang.disabled = true;
+      const message = `📤 *Clock Out*\n⏰ Waktu: ${now.toLocaleString()}\n📌 Terima kasih atas kerja keras Anda!`;
+      kirimKeTelegram(message);
+    });
 
-      log.innerHTML += `<p>Waktu Pulang: ${waktuPulang}</p>`;
-      kirimKeTelegram(`Waktu Pulang: ${waktuPulang}`);
+    clockOutOvertimeButton.addEventListener('click', () => {
+      const now = new Date();
+      const overtimeStart = new Date();
+      overtimeStart.setHours(16, 30, 0); // Jam 16:30
+      const duration = calculateDuration(overtimeStart, now);
+
+      const message = `⏱️ *Clock Out Lembur*\n⏰ Waktu: ${now.toLocaleString()}\n🕒 Durasi Lembur: ${duration.hours} jam ${duration.minutes} menit\n✨ Terima kasih atas dedikasinya!`;
+      kirimKeTelegram(message);
+    });
+
+    photoAbsenButton.addEventListener('click', async () => {
+      try {
+        const photo = await openCamera();
+        const message = `📸 *Foto Absen*\n⏰ Waktu: ${new Date().toLocaleString()}\n📋 Foto berhasil diambil.`;
+        kirimFotoKeTelegram(photo, message);
+      } catch (error) {
+        alert('Gagal membuka kamera.');
+      }
+    });
+
+    customSubmitButton.addEventListener('click', () => {
+      const type = document.getElementById('absenType').value;
+      const time = document.getElementById('customTime').value;
+      const reason = document.getElementById('customReason').value.trim();
+
+      if (!time) {
+        alert('Silakan isi waktu!');
+        return;
+      }
+
+      const reasonText = reason ? `📋 Alasan: ${reason}` : '';
+      const message = `${type === 'Clock In' ? '📥' : '📤'} *${type}*\n⏰ Waktu: ${time}\n${reasonText}\n⚡ Custom absensi telah berhasil!`;
+      kirimKeTelegram(message);
     });
 
     function kirimKeTelegram(pesan) {
       const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
       const data = {
         chat_id: chatId,
-        text: pesan
+        text: pesan,
+        parse_mode: "Markdown"
       };
 
       fetch(url, {
@@ -80,12 +146,59 @@
       })
       .then(response => {
         if (response.ok) {
-          console.log('Pesan terkirim ke Telegram');
+          alert('Pesan berhasil dikirim ke Telegram');
         } else {
-          console.error('Gagal mengirim pesan ke Telegram');
+          alert('Gagal mengirim pesan ke Telegram');
         }
       })
       .catch(error => console.error('Error:', error));
+    }
+
+    function kirimFotoKeTelegram(photoBlob, caption) {
+      const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+      const formData = new FormData();
+      formData.append('chat_id', chatId);
+      formData.append('photo', photoBlob, 'absen.jpg');
+      formData.append('caption', caption);
+
+      fetch(url, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Foto berhasil dikirim ke Telegram');
+        } else {
+          alert('Gagal mengirim foto ke Telegram');
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+    function calculateDuration(start, end) {
+      const diff = Math.abs(end - start);
+      const hours = Math.floor(diff / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      return { hours, minutes };
+    }
+
+    async function openCamera() {
+      return new Promise((resolve, reject) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'camera';
+
+        input.addEventListener('change', () => {
+          if (input.files.length > 0) {
+            resolve(input.files[0]);
+          } else {
+            reject('No photo selected');
+          }
+        });
+
+        input.click();
+      });
     }
   </script>
 </body>
