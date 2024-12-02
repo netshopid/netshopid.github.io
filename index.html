@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Absensi Kerja</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      color: white;
+      background-color: #007bff;
+      border-radius: 5px;
+    }
+    .button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #log {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sistem Absensi Kerja</h1>
+  <button id="btnMasuk" class="button">Waktu Masuk</button>
+  <button id="btnPulang" class="button" disabled>Waktu Pulang</button>
+  <div id="log"></div>
+
+  <script>
+    const botToken = "7906579922:AAHKusBJ0I00V9uk5lL0Ems4yhFeo7my_1s";
+    const chatId = "5934666948";
+
+    const btnMasuk = document.getElementById('btnMasuk');
+    const btnPulang = document.getElementById('btnPulang');
+    const log = document.getElementById('log');
+
+    let waktuMasuk = null;
+    let waktuPulang = null;
+
+    btnMasuk.addEventListener('click', () => {
+      const now = new Date();
+      waktuMasuk = now.toLocaleString();
+      btnMasuk.disabled = true;
+      btnPulang.disabled = false;
+
+      log.innerHTML = `<p>Waktu Masuk: ${waktuMasuk}</p>`;
+      kirimKeTelegram(`Waktu Masuk: ${waktuMasuk}`);
+    });
+
+    btnPulang.addEventListener('click', () => {
+      const now = new Date();
+      waktuPulang = now.toLocaleString();
+      btnPulang.disabled = true;
+
+      log.innerHTML += `<p>Waktu Pulang: ${waktuPulang}</p>`;
+      kirimKeTelegram(`Waktu Pulang: ${waktuPulang}`);
+    });
+
+    function kirimKeTelegram(pesan) {
+      const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+      const data = {
+        chat_id: chatId,
+        text: pesan
+      };
+
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log('Pesan terkirim ke Telegram');
+        } else {
+          console.error('Gagal mengirim pesan ke Telegram');
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+  </script>
+</body>
+</html>
