@@ -108,91 +108,107 @@
     <div id="toast"></div>
 
     <script>
-        const botToken = "7906579922:AAHKusBJ0I00V9uk5lL0Ems4yhFeo7my_1s";
-        const chatId = "5934666948";
+    <script>
+    const botToken = "7906579922:AAHKusBJ0I00V9uk5lL0Ems4yhFeo7my_1s";
+    const chatId = "5934666948";
 
-        const btnAbsensi = document.getElementById("btnAbsensi");
-        const info = document.getElementById("info");
-        const timeDisplay = document.getElementById("time");
-        const toast = document.getElementById("toast");
+    const btnAbsensi = document.getElementById("btnAbsensi");
+    const info = document.getElementById("info");
+    const timeDisplay = document.getElementById("time");
+    const toast = document.getElementById("toast");
 
-        const motivasiMasuk = [
-            "Hari baru, semangat baru! Tetap fokus pada tujuanmu.",
-            "Kerja keras hari ini adalah investasi untuk masa depanmu.",
-            "Setiap langkah kecil hari ini membawa kesuksesan lebih dekat!",
-            "Jadilah yang terbaik hari ini, dan hasilkan sesuatu yang luar biasa!"
-        ];
+    const motivasiMasuk = [
+        "Hari baru, semangat baru! Tetap fokus pada tujuanmu.",
+        "Kerja keras hari ini adalah investasi untuk masa depanmu.",
+        "Setiap langkah kecil hari ini membawa kesuksesan lebih dekat!",
+        "Jadilah yang terbaik hari ini, dan hasilkan sesuatu yang luar biasa!"
+    ];
 
-        const motivasiPulang = [
-            "Kerja kerasmu hari ini adalah bukti dedikasi. Istirahat yang cukup!",
-            "Hidup tidak hanya tentang kerja. Nikmati waktu untuk dirimu sendiri!",
-            "Pulanglah dengan bangga, karena hari ini kamu telah berusaha sebaik mungkin.",
-            "Lepaskan penatmu. Besok adalah kesempatan baru untuk bersinar!"
-        ];
+    const motivasiPulang = [
+        "Kerja kerasmu hari ini adalah bukti dedikasi. Istirahat yang cukup!",
+        "Hidup tidak hanya tentang kerja. Nikmati waktu untuk dirimu sendiri!",
+        "Pulanglah dengan bangga, karena hari ini kamu telah berusaha sebaik mungkin.",
+        "Lepaskan penatmu. Besok adalah kesempatan baru untuk bersinar!"
+    ];
 
-        function getRandomMotivasi(type) {
-            return type === "Absen Masuk" ? motivasiMasuk[Math.floor(Math.random() * motivasiMasuk.length)] : motivasiPulang[Math.floor(Math.random() * motivasiPulang.length)];
+    function getRandomMotivasi(type) {
+        return type === "Absen Masuk" ? motivasiMasuk[Math.floor(Math.random() * motivasiMasuk.length)] : motivasiPulang[Math.floor(Math.random() * motivasiPulang.length)];
+    }
+
+    function showToast(message) {
+        toast.textContent = message;
+        toast.className = "show";
+        setTimeout(() => {
+            toast.className = toast.className.replace("show", "");
+        }, 3000);
+    }
+
+    function updateTime() {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = now.toLocaleDateString('id-ID', options);
+        const formattedTime = now.toLocaleTimeString('id-ID');
+
+        timeDisplay.innerHTML = `${formattedDate} - ${formattedTime}`;
+    }
+
+    setInterval(updateTime, 1000);
+
+    btnAbsensi.addEventListener("click", () => {
+        const currentTime = new Date();
+        const hours = currentTime.getHours();
+        const minutes = currentTime.getMinutes();
+        const formattedTime = currentTime.toLocaleTimeString('id-ID');
+        const formattedDate = currentTime.toLocaleDateString('id-ID');
+        const absenType = isAbsenMasuk(hours, minutes) ? "Absen Masuk" : "Absen Pulang";
+
+        const motivasi = getRandomMotivasi(absenType);
+        const message = `📋 ${absenType}\n📅 Tanggal: ${formattedDate}\n⏰ Waktu: ${formattedTime}\n💡 Motivasi: ${motivasi}`;
+
+        sendToTelegram(message);
+
+        info.textContent = `${absenType} berhasil dikirim pada ${formattedDate} ${formattedTime}`;
+        showToast(`${absenType} berhasil dilakukan!`);
+    });
+
+    function isAbsenMasuk(hours, minutes) {
+        const totalMinutes = hours * 60 + minutes;
+        return totalMinutes >= 240 && totalMinutes <= 775;
+    }
+
+    function sendToTelegram(message) {
+        const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+        const payload = {
+            chat_id: chatId,
+            text: message,
+        };
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        })
+        .then(response => response.json())
+        .then(data => console.log("Success:", data))
+        .catch(error => console.error("Error:", error));
+    }
+
+    function updateButtonLabel() {
+        const currentTime = new Date();
+        const hours = currentTime.getHours();
+        const minutes = currentTime.getMinutes();
+
+        if (isAbsenMasuk(hours, minutes)) {
+            btnAbsensi.textContent = "Waktunya Absen Masuk";
+        } else {
+            btnAbsensi.textContent = "Saatnya Absen Pulang";
         }
+    }
 
-        function showToast(message) {
-            toast.textContent = message;
-            toast.className = "show";
-            setTimeout(() => {
-                toast.className = toast.className.replace("show", "");
-            }, 3000);
-        }
-
-        // Fungsi untuk memperbarui waktu secara realtime
-        function updateTime() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const formattedDate = now.toLocaleDateString('id-ID', options);
-            const formattedTime = now.toLocaleTimeString('id-ID');
-
-            timeDisplay.innerHTML = `${formattedDate} - ${formattedTime}`;
-        }
-        setInterval(updateTime, 1000);
-
-        btnAbsensi.addEventListener("click", () => {
-            const currentTime = new Date();
-            const hours = currentTime.getHours();
-            const minutes = currentTime.getMinutes();
-            const formattedTime = currentTime.toLocaleTimeString('id-ID');
-            const formattedDate = currentTime.toLocaleDateString('id-ID');
-            const absenType = isAbsenMasuk(hours, minutes) ? "Absen Masuk" : "Absen Pulang";
-
-            const motivasi = getRandomMotivasi(absenType);
-            const message = `📋 ${absenType}\n📅 Tanggal: ${formattedDate}\n⏰ Waktu: ${formattedTime}\n💡 Motivasi: ${motivasi}`;
-
-            sendToTelegram(message);
-
-            info.textContent = `${absenType} berhasil dikirim pada ${formattedDate} ${formattedTime}`;
-            showToast(`${absenType} berhasil dilakukan!`);
-        });
-
-        function isAbsenMasuk(hours, minutes) {
-            const totalMinutes = hours * 60 + minutes;
-            return totalMinutes >= 240 && totalMinutes <= 775;
-        }
-
-        function sendToTelegram(message) {
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-            const payload = {
-                chat_id: chatId,
-                text: message,
-            };
-
-            fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            })
-            .then(response => response.json())
-            .then(data => console.log("Success:", data))
-            .catch(error => console.error("Error:", error));
-        }
+    setInterval(updateButtonLabel, 1000);
+    updateButtonLabel();
     </script>
 </body>
 </html>
