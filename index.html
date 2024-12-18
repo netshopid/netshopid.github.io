@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Absensi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+        #time {
+            font-size: 16px;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+        .btn {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            background: #ff6b6b;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .btn:hover {
+            background: #e63946;
+            transform: scale(1.05);
+        }
+        .info {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #f1f1f1;
+            font-style: italic;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        /* Toast Style */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Aplikasi Absensi</h1>
+        <div id="time"></div>
+        <p class="info" id="info">Tekan tombol untuk melakukan absensi.</p>
+        <button class="btn" id="btnAbsensi">Absen Sekarang</button>
+        <footer>© 2024 Aplikasi Absensi Personal</footer>
+    </div>
+    <div id="toast"></div>
+
+    <script>
+        const botToken = "7906579922:AAHKusBJ0I00V9uk5lL0Ems4yhFeo7my_1s";
+        const chatId = "5934666948";
+
+        const btnAbsensi = document.getElementById("btnAbsensi");
+        const info = document.getElementById("info");
+        const timeDisplay = document.getElementById("time");
+        const toast = document.getElementById("toast");
+
+        const motivasiMasuk = [
+            "Hari baru, semangat baru! Tetap fokus pada tujuanmu.",
+            "Kerja keras hari ini adalah investasi untuk masa depanmu.",
+            "Setiap langkah kecil hari ini membawa kesuksesan lebih dekat!",
+            "Jadilah yang terbaik hari ini, dan hasilkan sesuatu yang luar biasa!"
+        ];
+
+        const motivasiPulang = [
+            "Kerja kerasmu hari ini adalah bukti dedikasi. Istirahat yang cukup!",
+            "Hidup tidak hanya tentang kerja. Nikmati waktu untuk dirimu sendiri!",
+            "Pulanglah dengan bangga, karena hari ini kamu telah berusaha sebaik mungkin.",
+            "Lepaskan penatmu. Besok adalah kesempatan baru untuk bersinar!"
+        ];
+
+        function getRandomMotivasi(type) {
+            return type === "Absen Masuk" ? motivasiMasuk[Math.floor(Math.random() * motivasiMasuk.length)] : motivasiPulang[Math.floor(Math.random() * motivasiPulang.length)];
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.className = "show";
+            setTimeout(() => {
+                toast.className = toast.className.replace("show", "");
+            }, 3000);
+        }
+
+        // Fungsi untuk memperbarui waktu secara realtime
+        function updateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = now.toLocaleDateString('id-ID', options);
+            const formattedTime = now.toLocaleTimeString('id-ID');
+
+            timeDisplay.innerHTML = `${formattedDate} - ${formattedTime}`;
+        }
+        setInterval(updateTime, 1000);
+
+        btnAbsensi.addEventListener("click", () => {
+            const currentTime = new Date();
+            const hours = currentTime.getHours();
+            const minutes = currentTime.getMinutes();
+            const formattedTime = currentTime.toLocaleTimeString('id-ID');
+            const formattedDate = currentTime.toLocaleDateString('id-ID');
+            const absenType = isAbsenMasuk(hours, minutes) ? "Absen Masuk" : "Absen Pulang";
+
+            const motivasi = getRandomMotivasi(absenType);
+            const message = `📋 ${absenType}\n📅 Tanggal: ${formattedDate}\n⏰ Waktu: ${formattedTime}\n💡 Motivasi: ${motivasi}`;
+
+            sendToTelegram(message);
+
+            info.textContent = `${absenType} berhasil dikirim pada ${formattedDate} ${formattedTime}`;
+            showToast(`${absenType} berhasil dilakukan!`);
+        });
+
+        function isAbsenMasuk(hours, minutes) {
+            const totalMinutes = hours * 60 + minutes;
+            return totalMinutes >= 240 && totalMinutes <= 775;
+        }
+
+        function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            const payload = {
+                chat_id: chatId,
+                text: message,
+            };
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(response => response.json())
+            .then(data => console.log("Success:", data))
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>
