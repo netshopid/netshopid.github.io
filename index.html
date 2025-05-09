@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,7 +67,6 @@
             font-size: 12px;
             color: rgba(255, 255, 255, 0.6);
         }
-        /* Toast Style */
         #toast {
             visibility: hidden;
             min-width: 250px;
@@ -95,6 +95,16 @@
             from { bottom: 30px; opacity: 1; }
             to { bottom: 0; opacity: 0; }
         }
+        #keterangan {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: 'Poppins';
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -103,6 +113,7 @@
         <div id="time"></div>
         <p class="info" id="info">Tekan tombol untuk melakukan absensi.</p>
         <button class="btn" id="btnAbsensi">Absen Sekarang</button>
+        <input type="text" id="keterangan" placeholder="Keterangan (Opsional)">
         <footer>© 2024 Aplikasi Absensi Personal</footer>
     </div>
     <div id="toast"></div>
@@ -115,24 +126,7 @@
         const info = document.getElementById("info");
         const timeDisplay = document.getElementById("time");
         const toast = document.getElementById("toast");
-
-        const motivasiMasuk = [
-            "Hari baru, semangat baru! Tetap fokus pada tujuanmu.",
-            "Kerja keras hari ini adalah investasi untuk masa depanmu.",
-            "Setiap langkah kecil hari ini membawa kesuksesan lebih dekat!",
-            "Jadilah yang terbaik hari ini, dan hasilkan sesuatu yang luar biasa!"
-        ];
-
-        const motivasiPulang = [
-            "Kerja kerasmu hari ini adalah bukti dedikasi. Istirahat yang cukup!",
-            "Hidup tidak hanya tentang kerja. Nikmati waktu untuk dirimu sendiri!",
-            "Pulanglah dengan bangga, karena hari ini kamu telah berusaha sebaik mungkin.",
-            "Lepaskan penatmu. Besok adalah kesempatan baru untuk bersinar!"
-        ];
-
-        function getRandomMotivasi(type) {
-            return type === "Absen Masuk" ? motivasiMasuk[Math.floor(Math.random() * motivasiMasuk.length)] : motivasiPulang[Math.floor(Math.random() * motivasiPulang.length)];
-        }
+        const inputKeterangan = document.getElementById("keterangan");
 
         function showToast(message) {
             toast.textContent = message;
@@ -142,13 +136,11 @@
             }, 3000);
         }
 
-        // Fungsi untuk memperbarui waktu secara realtime
         function updateTime() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const formattedDate = now.toLocaleDateString('id-ID', options);
             const formattedTime = now.toLocaleTimeString('id-ID');
-
             timeDisplay.innerHTML = `${formattedDate} - ${formattedTime}`;
         }
         setInterval(updateTime, 1000);
@@ -160,14 +152,18 @@
             const formattedTime = currentTime.toLocaleTimeString('id-ID');
             const formattedDate = currentTime.toLocaleDateString('id-ID');
             const absenType = isAbsenMasuk(hours, minutes) ? "Absen Masuk" : "Absen Pulang";
+            const keterangan = inputKeterangan.value.trim();
 
-            const motivasi = getRandomMotivasi(absenType);
-            const message = `📋 ${absenType}\n📅 Tanggal: ${formattedDate}\n⏰ Waktu: ${formattedTime}\n💡 Motivasi: ${motivasi}`;
+            let message = `📋 ${absenType}\n📅 Tanggal: ${formattedDate}\n⏰ Waktu: ${formattedTime}`;
+            if (keterangan) {
+                message += `\n📝 Keterangan: ${keterangan}`;
+            }
 
             sendToTelegram(message);
 
             info.textContent = `${absenType} berhasil dikirim pada ${formattedDate} ${formattedTime}`;
             showToast(`${absenType} berhasil dilakukan!`);
+            inputKeterangan.value = "";
         });
 
         function isAbsenMasuk(hours, minutes) {
